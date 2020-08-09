@@ -4,7 +4,8 @@ from django.shortcuts import render
 from .models import Tweet
 
 def home_view(request,*args, **kwargs):
-    return HttpResponse("<h1>Hello World</h1>")
+    template = "pages/home.html"
+    return render(request, template, context={}, status=200)
 
 
 def tweet_detail_view(request, *args, **kwargs):
