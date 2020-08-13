@@ -111,7 +111,7 @@ function loadTweets(tweetsElement) {
     // When the request loads, the XMLHttpRequest will render the final Tweets as a str.
     xhr.onload = function() {
         const serverResponse = xhr.response
-        const listedItems = serverResponse.response // array
+        const listedItems = serverResponse
         var finalTweetStr = ""
         var i;
         for (i=0; i<listedItems.length; i++) {

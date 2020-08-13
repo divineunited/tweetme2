@@ -3,6 +3,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.http import is_safe_url
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 from .models import Tweet
 from .forms import TweetForm
@@ -13,15 +15,16 @@ def home_view(request, *args, **kwargs):
     template = "pages/home.html"
     return render(request, template, context={}, status=200)
 
+@api_view(['POST']) # http method client needs to be post
 def tweet_create_view(request, *args, **kwargs):
     """
     REST API Create View with Django Rest Framework
     """
-    serializer = TweetSerializer(data=request.POST or None)
-    if serializer.is_valid():
+    serializer = TweetSerializer(data=request.POST)
+    if serializer.is_valid(raise_exception=True):
         serializer.save(user=request.user)
-        return JsonResponse(serializer.data, status=201)
-    return JsonResponse({}, status=400)
+        return Response(serializer.data, status=201)
+    return Response({}, status=400)
 
 def tweet_create_view_pure_django(request, *args, **kwargs):
     """
@@ -51,9 +54,19 @@ def tweet_create_view_pure_django(request, *args, **kwargs):
             return JsonResponse(form.errors, status=400)
     return render(request, 'components/form.html', context={"form": form})
 
+@api_view(['GET'])
 def tweet_list_view(request, *args, **kwargs):
     """
-    REST API VIEW
+    REST API VIEW using DRF
+    """
+    qs = Tweet.objects.all()
+    serializer = TweetSerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+def tweet_list_view_pure_django(request, *args, **kwargs):
+    """
+    REST API VIEW in Pure Django
     """
     qs = Tweet.objects.all()
     tweets_list = [x.serialize() for x in qs]
@@ -63,9 +76,22 @@ def tweet_list_view(request, *args, **kwargs):
     }
     return JsonResponse(data)
 
-def tweet_detail_view(request, *args, **kwargs):
+@api_view(['GET'])
+def tweet_detail_view(request, tweet_id, *args, **kwargs):
     """
-    REST API view
+    REST API VIEW using DRF
+    """
+    qs = Tweet.objects.filter(id=tweet_id)
+    if not qs.exists():
+        return Response({}, status=404)
+    obj = qs.first()
+    serializer = TweetSerializer(obj)
+    return Response(serializer.data)
+
+
+def tweet_detail_view_pure_django(request, *args, **kwargs):
+    """
+    REST API view in pure django
     """
     tweet_id = kwargs.get('tweet_id')
     data = {"id": tweet_id,}
