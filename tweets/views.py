@@ -6,6 +6,7 @@ from django.utils.http import is_safe_url
 
 from .models import Tweet
 from .forms import TweetForm
+from .serializers import TweetSerializer
 
 def home_view(request, *args, **kwargs):
     print(request.user or None)
@@ -15,6 +16,16 @@ def home_view(request, *args, **kwargs):
 def tweet_create_view(request, *args, **kwargs):
     """
     REST API Create View with Django Rest Framework
+    """
+    serializer = TweetSerializer(data=request.POST or None)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return JsonResponse(serializer.data, status=201)
+    return JsonResponse({}, status=400)
+
+def tweet_create_view_pure_django(request, *args, **kwargs):
+    """
+    BACKUP VIEW
     """
     user = request.user
     if not request.user.is_authenticated:
