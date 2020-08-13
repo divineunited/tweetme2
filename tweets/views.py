@@ -1,6 +1,8 @@
 import random
+from django.conf import settings
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
+from django.utils.http import is_safe_url
 
 from .models import Tweet
 from .forms import TweetForm
@@ -16,7 +18,7 @@ def tweet_create_view(request, *args, **kwargs):
     if form.is_valid():
         obj = form.save(commit=False)
         obj.save() # save to db
-        if next_url:
+        if next_url and is_safe_url(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
             return redirect(next_url)
         # reinitialize a new blank form here and passed back to component
         form = TweetForm()
