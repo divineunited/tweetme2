@@ -13,6 +13,9 @@ def home_view(request, *args, **kwargs):
     return render(request, template, context={}, status=200)
 
 def tweet_create_view(request, *args, **kwargs):
+    """
+    REST API Create View with Django Rest Framework
+    """
     user = request.user
     if not request.user.is_authenticated:
         user = None
