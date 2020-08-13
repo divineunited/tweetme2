@@ -36,13 +36,17 @@ function handleTweetCreateFormDidSubmit(event) {
     const endpoint = myForm.getAttribute("action")
     const method = myForm.getAttribute("method")
     const xhr = new XMLHttpRequest()
+    xhr.responseType="json"
     xhr.open(method, endpoint)
     // need to manually set these headers for Django to know it's an AJAX request
     xhr.setRequestHeader("HTTP_X_REQUESTED_WITH", "XMLHttpRequest")
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
     xhr.onload = function() {
-        const tweetsEl = document.getElementById("tweets")
-        loadTweets(tweetsEl)
+        if (xhr.status === 201) {
+            const newTweet = xhr.response
+            const newTweetElement = formatTweetElement(newTweet)
+            console.log(newTweetElement)
+        }
     }
     xhr.send(myFormData)
 }
@@ -51,7 +55,7 @@ const tweetCreateFormEl = document.getElementById("tweet-create-form")
 
 tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
 
-const tweetsEl = document.getElementById("tweets")
+const tweetsContainerElement = document.getElementById("tweets")
 
 function loadTweets(tweetsElement) {
     // All modern browsers have a built-in XMLHttpRequest object to request data from a server
@@ -64,8 +68,7 @@ function loadTweets(tweetsElement) {
     const xhr = new XMLHttpRequest()
     const method = 'GET'
     const url = '/tweets'
-    const responseType = 'json'
-    xhr.responseType = responseType
+    xhr.responseType = 'json'
 
     // We define the XMLHttpRequest to Get at this URL when it opens
     xhr.open(method, url)
@@ -86,7 +89,7 @@ function loadTweets(tweetsElement) {
     xhr.send()
 }
 
-loadTweets(tweetsEl)
+loadTweets(tweetsContainerElement)
 
 function handleDidLike(tweet_id, currentCount) {
     console.log(tweet_id, currentCount)

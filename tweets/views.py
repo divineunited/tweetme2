@@ -19,7 +19,7 @@ def tweet_create_view(request, *args, **kwargs):
         obj = form.save(commit=False)
         obj.save() # save to db
         if request.is_ajax():
-            return JsonResponse({}, status=201) # 201 == created
+            return JsonResponse(obj.serialize(), status=201) # 201 == created
         if next_url and is_safe_url(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
             return redirect(next_url)
         # reinitialize a new blank form here and passed back to component
@@ -31,13 +31,7 @@ def tweet_list_view(request, *args, **kwargs):
     REST API VIEW
     """
     qs = Tweet.objects.all()
-    tweets_list = [
-        {
-            "id": x.id, 
-            "content": x.content,
-            "likes": random.randint(0, 10000)
-        } for x in qs
-    ]
+    tweets_list = [x.serialize() for x in qs]
     data = {
         "isUser": False,
         "response": tweets_list,
