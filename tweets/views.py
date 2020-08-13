@@ -8,15 +8,23 @@ from .models import Tweet
 from .forms import TweetForm
 
 def home_view(request, *args, **kwargs):
+    print(request.user or None)
     template = "pages/home.html"
     return render(request, template, context={}, status=200)
 
 def tweet_create_view(request, *args, **kwargs):
+    user = request.user
+    if not request.user.is_authenticated:
+        user = None
+        if request.is_ajax():
+            return JsonResponse({}, status=401) #not authorized
+        return redirect(settings.LOGIN_URL)
     form = TweetForm(request.POST or None)
     next_url = request.POST.get("next")
 
     if form.is_valid():
         obj = form.save(commit=False)
+        obj.user = user
         obj.save() # save to db
         if request.is_ajax():
             return JsonResponse(obj.serialize(), status=201) # 201 == created
