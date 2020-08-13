@@ -4,6 +4,7 @@
         - image
     - delete
     - retweeting
+    - liking
 
 2. Users
     - register

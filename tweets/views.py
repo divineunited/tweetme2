@@ -3,10 +3,20 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 
 from .models import Tweet
+from .forms import TweetForm
 
 def home_view(request,*args, **kwargs):
     template = "pages/home.html"
     return render(request, template, context={}, status=200)
+
+def tweet_create_view(request, *args, **kwargs):
+    form = TweetForm(request.POST or None)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        obj.save() # save to db
+        # reinitialize a new blank form here and passed back to component
+        form = TweetForm()
+    return render(request, 'components/form.html', context={"form": form})
 
 def tweet_list_view(request, *args, **kwargs):
     """
