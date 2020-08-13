@@ -14,7 +14,7 @@ Welcome!
 
 <div class='row mb-4'>
     <div class='col-md-4 mx-auto col-10'>
-        <form class='form' method='POST' action='/create-tweet'>
+        <form class='form' id='tweet-create-form' method='POST' action='/create-tweet'>
             {% csrf_token %}
             <input type='hidden' value='/' name='next' />
             <textarea class='form-control' name='content' placeholder='Your tweet...'></textarea>
@@ -28,7 +28,62 @@ Welcome!
 </div>
 
 <script>
-const tweetsElement = document.getElementById("tweets") // get html element that we will update
+
+function handleTweetCreateFormDidSubmit(event) {
+    event.preventDefault()
+    const myForm = event.target
+    const myFormData = new FormData(myForm) // built in class related to form data
+    const endpoint = myForm.getAttribute("action")
+    const method = myForm.getAttribute("method")
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, endpoint)
+    xhr.onload = function() {
+        const tweetsEl = document.getElementById("tweets")
+        loadTweets(tweetsEl)
+    }
+    xhr.send(myFormData)
+}
+
+const tweetCreateFormEl = document.getElementById("tweet-create-form")
+
+tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
+
+const tweetsEl = document.getElementById("tweets")
+
+function loadTweets(tweetsElement) {
+    // All modern browsers have a built-in XMLHttpRequest object to request data from a server
+        // This object is a dream object because it can:
+        // Update a web page without reloading the page
+        // Request data from a server - after the page has loaded
+        // Receive data from a server  - after the page has loaded
+        // Send data to a server - in the background
+    // Here, we define our xml request as a JSON type
+    const xhr = new XMLHttpRequest()
+    const method = 'GET'
+    const url = '/tweets'
+    const responseType = 'json'
+    xhr.responseType = responseType
+
+    // We define the XMLHttpRequest to Get at this URL when it opens
+    xhr.open(method, url)
+
+    // When the request loads, the XMLHttpRequest will render the final Tweets as a str.
+    xhr.onload = function() {
+        const serverResponse = xhr.response
+        const listedItems = serverResponse.response // array
+        var finalTweetStr = ""
+        var i;
+        for (i=0; i<listedItems.length; i++) {
+            var tweetObj = listedItems[i]
+            var currentItem = formatTweetElement(tweetObj)
+            finalTweetStr += currentItem
+        }
+        tweetsElement.innerHTML = finalTweetStr
+    }
+    xhr.send()
+}
+
+loadTweets(tweetsEl)
 
 function handleDidLike(tweet_id, currentCount) {
     console.log(tweet_id, currentCount)
@@ -46,37 +101,6 @@ function formatTweetElement(tweet){
         "</div></div>"
     return formattedTweet
 }
-
-// All modern browsers have a built-in XMLHttpRequest object to request data from a server
-    // This object is a dream object because it can:
-    // Update a web page without reloading the page
-    // Request data from a server - after the page has loaded
-    // Receive data from a server  - after the page has loaded
-    // Send data to a server - in the background
-// Here, we define our xml request as a JSON type
-const xhr = new XMLHttpRequest()
-const method = 'GET'
-const url = '/tweets'
-const responseType = 'json'
-xhr.responseType = responseType
-
-// We define the XMLHttpRequest to Get at this URL when it opens
-xhr.open(method, url)
-
-// When the request loads, the XMLHttpRequest will render the final Tweets as a str.
-xhr.onload = function() {
-    const serverResponse = xhr.response
-    const listedItems = serverResponse.response // array
-    var finalTweetStr = ""
-    var i;
-    for (i=0; i<listedItems.length; i++) {
-        var tweetObj = listedItems[i]
-        var currentItem = formatTweetElement(tweetObj)
-        finalTweetStr += currentItem
-    }
-    tweetsElement.innerHTML = finalTweetStr
-}
-xhr.send()
 
 </script>
 {% endblock content %}
