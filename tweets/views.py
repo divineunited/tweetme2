@@ -7,7 +7,7 @@ from django.utils.http import is_safe_url
 from .models import Tweet
 from .forms import TweetForm
 
-def home_view(request,*args, **kwargs):
+def home_view(request, *args, **kwargs):
     template = "pages/home.html"
     return render(request, template, context={}, status=200)
 
@@ -18,6 +18,8 @@ def tweet_create_view(request, *args, **kwargs):
     if form.is_valid():
         obj = form.save(commit=False)
         obj.save() # save to db
+        if request.is_ajax():
+            return JsonResponse({}, status=201) # 201 == created
         if next_url and is_safe_url(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
             return redirect(next_url)
         # reinitialize a new blank form here and passed back to component

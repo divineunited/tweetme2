@@ -37,6 +37,9 @@ function handleTweetCreateFormDidSubmit(event) {
     const method = myForm.getAttribute("method")
     const xhr = new XMLHttpRequest()
     xhr.open(method, endpoint)
+    // need to manually set these headers for Django to know it's an AJAX request
+    xhr.setRequestHeader("HTTP_X_REQUESTED_WITH", "XMLHttpRequest")
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
     xhr.onload = function() {
         const tweetsEl = document.getElementById("tweets")
         loadTweets(tweetsEl)
