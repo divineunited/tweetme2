@@ -73,7 +73,7 @@ function handleTweetCreateFormDidSubmit(event) {
             } else {
                 alert("An error occurred. Please try again.")
             }
-        } else if (xhr.status === 401) {
+        } else if (xhr.status === 403) {
             alert("You must login.")
             window.location.href = "/login"
         } else if (xhr.status === 500) {

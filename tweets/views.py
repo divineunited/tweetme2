@@ -4,18 +4,26 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.http import is_safe_url
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 
 from .models import Tweet
 from .forms import TweetForm
 from .serializers import TweetSerializer
 
+
 def home_view(request, *args, **kwargs):
-    print(request.user or None)
+    """
+    Home page that hosts the JS / React
+    """
     template = "pages/home.html"
     return render(request, template, context={}, status=200)
 
+
 @api_view(['POST']) # http method client needs to be post
+# @authentication_classes([SessionAuthentication]) # only session authentication is a valid source of auth
+@permission_classes([IsAuthenticated]) # only allow access to this view if authenticated
 def tweet_create_view(request, *args, **kwargs):
     """
     REST API Create View with Django Rest Framework
@@ -25,6 +33,7 @@ def tweet_create_view(request, *args, **kwargs):
         serializer.save(user=request.user)
         return Response(serializer.data, status=201)
     return Response({}, status=400)
+
 
 def tweet_create_view_pure_django(request, *args, **kwargs):
     """
@@ -54,6 +63,7 @@ def tweet_create_view_pure_django(request, *args, **kwargs):
             return JsonResponse(form.errors, status=400)
     return render(request, 'components/form.html', context={"form": form})
 
+
 @api_view(['GET'])
 def tweet_list_view(request, *args, **kwargs):
     """
@@ -75,6 +85,7 @@ def tweet_list_view_pure_django(request, *args, **kwargs):
         "response": tweets_list,
     }
     return JsonResponse(data)
+
 
 @api_view(['GET'])
 def tweet_detail_view(request, tweet_id, *args, **kwargs):
