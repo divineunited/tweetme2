@@ -4,6 +4,8 @@
         - image
     - delete
     - retweeting
+        - read only serializer
+        - create only serializer
     - liking or unliking
 
 2. Users

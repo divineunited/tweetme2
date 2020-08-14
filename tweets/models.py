@@ -17,7 +17,10 @@ class TweetLike(models.Model):
 
 class Tweet(models.Model):
     # Maps to SQL data
-    # id = models.AutoField(primary_key=True)
+    # id = models.AutoField(primary_key=True) 
+    # Parent is referencing itself "before it's defined" for retweeting
+        # When the parent tweet is deleted, the retweet is just set to null
+    parent = models.ForeignKey("self", null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey(User, on_delete=models.CASCADE) # one user can have many tweets
     likes = models.ManyToManyField(User, related_name='tweet_user', blank=True, through=TweetLike) # references above model
     content = models.TextField(blank=True, null=True)
@@ -26,10 +29,7 @@ class Tweet(models.Model):
 
     class Meta:
         ordering = ['-id']
-    
-    def serialize(self):
-        return {
-            "id": self.id,
-            "content": self.content,
-            "likes": random.randint(0, 200)
-        }
+
+    @property
+    def is_retweet(self):
+        return self.parent != None
