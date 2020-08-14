@@ -10,7 +10,7 @@ from rest_framework.authentication import SessionAuthentication
 
 from .models import Tweet
 from .forms import TweetForm
-from .serializers import TweetSerializer
+from .serializers import TweetSerializer, TweetActionSerializer
 
 
 def home_view(request, *args, **kwargs):
@@ -81,6 +81,39 @@ def tweet_delete_view(request, tweet_id, *args, **kwargs):
     obj = qs.first() # there should only be 1 tweet per tweet id
     obj.delete()
     return Response({"message": "Tweet removed."}, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def tweet_action_view(request, *args, **kwargs):
+    """
+    Action options for tweets that the user of the tweet does not have control of:
+        - like
+        - unlike
+        - retweet
+    
+    ID and action is required in the request.
+    """
+    # we use a serializer to define actions from the POST more systematically
+    serializer = TweetActionSerializer(data = request.POST)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.validated_data
+        tweet_id = data.get("id")
+        action = data.get("action")
+    
+        qs = Tweet.objects.filter(id=tweet_id)
+        if not qs.exists():
+            return Response({}, status=404)
+        obj = qs.first() # there should only be 1 tweet per tweet id
+        if action == "like":
+            obj.likes.add(request.user)
+        elif action == 'unlike':
+            obj.likes.remove(request.user)
+        elif action == 'retweet':
+            # TODO: implmenet retweet
+            pass
+    return Response({"message": "Tweet removed."}, status=200)
+
 
 
 @api_view(['GET'])
