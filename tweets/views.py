@@ -64,6 +64,25 @@ def tweet_create_view_pure_django(request, *args, **kwargs):
     return render(request, 'components/form.html', context={"form": form})
 
 
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsAuthenticated])
+def tweet_delete_view(request, tweet_id, *args, **kwargs):
+    """
+    Allow for deletion of tweets
+    """
+    qs = Tweet.objects.filter(id=tweet_id)
+    # if can't find it, return object not found status 404
+    if not qs.exists():
+        return Response({}, status=404)
+    # filter qs down to the user to make sure that the user is the same
+    qs = qs.filter(user=request.user)
+    if not qs.exists():
+        return Response({"message": "Unauthorized to delete this tweet."}, status=401)
+    obj = qs.first() # there should only be 1 tweet per tweet id
+    obj.delete()
+    return Response({"message": "Tweet removed."}, status=200)
+
+
 @api_view(['GET'])
 def tweet_list_view(request, *args, **kwargs):
     """
