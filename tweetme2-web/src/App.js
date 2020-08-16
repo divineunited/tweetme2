@@ -2,12 +2,47 @@ import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+
+function loadTweets(callback) {
+  // All modern browsers have a built-in XMLHttpRequest object to request data from a server
+      // This object is a dream object because it can:
+      // Update a web page without reloading the page
+      // Request data from a server - after the page has loaded
+      // Receive data from a server  - after the page has loaded
+      // Send data to a server - in the background
+  // Here, we define our xml request as a JSON type
+  const xhr = new XMLHttpRequest()
+  const method = 'GET'
+  const url = 'http://localhost:8000/api/tweets/'
+  xhr.responseType = 'json'
+
+  // We define the XMLHttpRequest to Get at this URL when it opens
+  xhr.open(method, url)
+
+  // When the request loads, the XMLHttpRequest will render the final Tweets as a str.
+  xhr.onload = function() {
+    callback(xhr.response, xhr.status)
+  }
+  xhr.onerror = function(e) {
+    console.log(e)
+    callback({"message": "The request was an error"}, 400)
+  }
+  xhr.send()
+}
+
+
 function App() {
   const [tweets, setTweets] = useState([])
   useEffect(() => {
-    // do my lookup
-    const tweetItems = [{"content": 123}, {"content": "Hello World"}]
-    setTweets(tweetItems)
+    const myCallback = (response, status) => {
+      console.log(response, status)
+      if (status === 200) {
+        setTweets(response)
+      } else {
+        alert("There was an error.")
+      }
+    }
+    loadTweets(myCallback)
   }, [])
   return (
     <div className="App">
