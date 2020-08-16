@@ -1,0 +1,23 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+tweetme2-web/node_modules
+tweetme2-web/.pnp
+tweetme2-web/.pnp.js
+
+# testing
+tweetme2-web/coverage
+
+# production
+tweetme2-web/build
+
+# misc
+tweetme2-web/.DS_Store
+tweetme2-web/.env.local
+tweetme2-web/.env.development.local
+tweetme2-web/.env.test.local
+tweetme2-web/.env.production.local
+
+tweetme2-web/npm-debug.log*
+tweetme2-web/yarn-debug.log*
+tweetme2-web/yarn-error.log*
